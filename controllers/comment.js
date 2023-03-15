@@ -50,11 +50,10 @@ exports.deleteCommentById = async (req, res) => {
 }
 
 
-exports.updateCommentById = async (req, res) => {
+exports.editCommentById = async (req, res) => {
     try {
-        console.log('hello')
         const { id, role } = req.user
-        const comment_id = req.query.id
+        const comment_id = req.params.id
 
         const comment = await commentModel.findOne({
             where: {
@@ -64,7 +63,6 @@ exports.updateCommentById = async (req, res) => {
             include: [{ model: Post, as: 'postDetails', include: [{ model: User, as: "userDetails" }] }]
         })
         if (comment.user_id == id || role === "ADMIN" || comment.postDetails.user_id == comment.postDetails.userDetails.id) {
-
             await commentModel.update(req.body, { where: { id: comment_id } })
 
             return res.status(200).json({ 'message': "Comment updated successfully" })

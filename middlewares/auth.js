@@ -22,10 +22,10 @@ exports.isAuth = function (roles) {
                 }
                 if (roles.includes(user.role)) {
                     req.user = user
+
                     next()
                 }
                 else {
-                    console.log(roles, "second")
 
                     return res.status(401).json({ message: "Unauthorized user" })
 

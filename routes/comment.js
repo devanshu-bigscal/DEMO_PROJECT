@@ -1,11 +1,11 @@
-const { createComment, deleteCommentById, updateCommentById } = require("../controllers/comment")
+const { createComment, deleteCommentById, editCommentById } = require("../controllers/comment")
 
 const { isAuth } = require("../middlewares/auth")
 
 const router = require("express")()
 
 router.post("/post/:id", isAuth(['USER', 'ADMIN']), createComment)
-router.put("/", isAuth(['USER', 'ADMIN'], updateCommentById))
+router.put("/:id", isAuth(['USER', 'ADMIN']), editCommentById)
 router.delete("/:id", isAuth(['USER', 'ADMIN']), deleteCommentById)
 
 
