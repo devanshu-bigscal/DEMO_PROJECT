@@ -85,9 +85,56 @@ exports.login = async (req, res) => {
     }
 };
 
+exports.updateUser = async (req, res) => {
+
+    try {
+
+        const { id } = req.user
+
+
+        const user = await userModel.update(req.body, { where: { id: id } })
+
+        if (!user) return res.status(400).json({ "message": "Bad Request", error: "Error while updating user profile" })
+
+        return res.status(200).json({ message: "User profile updated successfully" })
+    } catch (error) {
+        console.log(error)
+        if (!user) return res.status(400).json({ "message": "Bad Request", error: "Error while updating user profile" })
+
+    }
+}
+
+
+
 exports.logOut = (req, res) => {
     if (res.cookie("auth_token")) {
         res.clearCookie("auth_token");
     }
     return res.status(200).json({ message: "User logged out successfully" });
 };
+
+
+exports.assignAdmin = async (req, res) => {
+
+    try {
+        const { role } = req.user
+        if (role !== "ADMIN") {
+            return res.status(401).json({ message: "Unauthorized" })
+        }
+        const userId = req.params.id
+
+        const user = await userModel.findOne({ where: { id: userId } })
+
+        if (!user) return res.status(404).json({ 'message': "Not Found", error: "No user found with given user id" })
+
+        user.role = "ADMIN"
+
+        await user.save()
+
+        return res.status(200).json({ message: "Admin credentials are assigned to user" })
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({ message: "Bad Request", error: "Error while assigning admin credentials" })
+
+    }
+}

@@ -4,6 +4,7 @@ const router = require("express")()
 const multer = require("multer")
 const { v4 } = require("uuid")
 const { isAuth } = require("../middlewares/auth")
+const { validatePost, validatePostId } = require("../validations/post")
 const upload = multer({
     fileFilter: (req, file, cb) => {
         file.size = parseInt(req.headers["content-length"]) // 3e6 - 3mb
@@ -27,11 +28,11 @@ const upload = multer({
     })
 })
 
-router.post("/", isAuth(['USER', 'ADMIN']), upload.single("image"), createPost)
+router.post("/", isAuth(['USER', 'ADMIN']), upload.single("image"), validatePost, createPost)
 router.get("/myposts", isAuth(['USER', 'ADMIN']), allUserPosts)
 router.get("/", isAuth(['USER', 'ADMIN']), allUserPostsExpectUser)
-router.get("/postid/:id", isAuth(['USER']), getPostById)
-router.delete("/:id", isAuth(['USER', 'ADMIN']), deletePostById)
-router.put("/:id", isAuth(['USER', 'ADMIN']), upload.single("image"), editPostById)
+router.get("/postid/:id", isAuth(['USER']), validatePostId, getPostById)
+router.delete("/:id", isAuth(['USER', 'ADMIN']), validatePostId, deletePostById)
+router.put("/:id", isAuth(['USER', 'ADMIN']), upload.single("image"), validatePostId, editPostById)
 
 module.exports = router

@@ -26,8 +26,9 @@ app.use(cookieParser())
 app.use("/auth", authRoutes)
 app.use("/post", postRoutes)
 app.use("/comment", commentRoutes)
-
-
+app.get("/*", (req, res) => {
+    res.status(404).json({ message: "NOT FOUND" })
+})
 
 // Connections
 const port = process.env.PORT || 8000;

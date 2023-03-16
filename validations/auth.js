@@ -1,31 +1,28 @@
 const Joi = require("joi")
-
+const errorMessages = require("./errors")
 exports.validateSignup = async (req, res, next) => {
     try {
         const schema = Joi.object({
-            fullName: Joi.string().required().min(3).max(50).messages({
-                'string.empty': `"fullName" cannot be an empty field`,
-                'any.required': `"fullName" is a required field`
-            }),
-            email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required().messages({
-                'string.empty': `"email" cannot be an empty field`,
-                'any.required': `"email" is a required field`
-            }),
-            password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required().min(6).max(12).messages({
-                'string.empty': `"password" cannot be an empty field`,
-                'string.min': `"password" should have a minimum length of 3`,
-                'any.required': `"password" is a required field`
-            }),
-            contact: Joi.string().length(10).pattern(/^[0-9]+$/).required().messages({
-                'string.empty': `"contact" cannot be an empty field`,
-                'string.min': `"contact" should have a length of 10`,
-                'any.required': `"contact" is a required field`
-            }),
+            fullName: Joi.string().required().min(3).max(50),
+            email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required(),
+            password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required().min(6).max(12),
+            contact: Joi.string().length(10).pattern(/^[0-9]+$/).required()
         })
-        const value = await schema.validateAsync(req.body)
+
+        const option = {
+            abortEarly: false,
+            errorMessages
+        }
+
+        const value = await schema.validateAsync(req.body, option)
         next()
     } catch (error) {
-        res.status(400).json({ message: 'Bad Request', error: error.details[0].message })
+
+        error = error.details.map(e => {
+            return e.message
+        })
+
+        res.status(400).json({ message: 'Bad Request', error: error })
     }
 }
 
@@ -33,20 +30,67 @@ exports.validateSignup = async (req, res, next) => {
 exports.validateLogin = async (req, res, next) => {
     try {
         const schema = Joi.object({
-            email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required().messages({
-                'string.empty': `"email" cannot be an empty field`,
-                'any.required': `"email" is a required field`
-            }),
-            password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required().min(6).max(12).messages({
-                'string.empty': `"password" cannot be an empty field`,
-                'string.min': `"password" should have a minimum length of 3`,
-                'any.required': `"password" is a required field`
-            }),
+            email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required(),
+            password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required().min(6).max(12)
         })
-        const value = await schema.validateAsync(req.body)
+
+        const option = {
+            abortEarly: false,
+            errorMessages
+        }
+
+        const value = await schema.validateAsync(req.body, option)
         next()
     } catch (error) {
-        res.status(400).json({ message: 'Bad Request', error: error.details[0].message })
+        error = error.details.map(e => {
+            return e.message
+        })
+
+        res.status(400).json({ message: 'Bad Request', error: error })
 
     }
 }
+
+exports.validateUpdate = async (req, res, next) => {
+    try {
+        const schema = Joi.object({
+            fullName: Joi.string().min(3).max(50),
+            email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
+            contact: Joi.string().length(10).pattern(/^[0-9]+$/)
+        })
+        const option = {
+            abortEarly: false,
+            errorMessages
+        }
+
+        const value = await schema.validateAsync(req.body, option)
+        next()
+    } catch (error) {
+        error = error.details.map(e => {
+            return e.message
+        })
+
+        res.status(400).json({ message: 'Bad Request', error: error })
+
+    }
+}
+
+
+exports.validateUserId = async (req, res, next) => {
+    try {
+
+        const schema = Joi.object({
+            id: Joi.number().required()
+        })
+
+        const value = await schema.validateAsync(req.params)
+        next()
+
+    } catch (error) {
+        error = error.details.map(e => {
+            return e.message
+        })
+        res.status(400).json({ message: "Bad Request", error: error })
+    }
+}
+
