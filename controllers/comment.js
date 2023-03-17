@@ -75,7 +75,8 @@ exports.editCommentById = async (req, res) => {
 
         if (!comment) return res.status(404).json({ status: 404, error: "Not found", message: "comment not found to update" })
 
-        if (comment.user_id == id || role === "ADMIN" || comment.allComments[0].user_id == comment.allComments[0].userDetails.id) {
+
+        if (((comment.allComments[0].user_id == comment.allComments[0].userDetails.id) && Number(comment.user_id) !== id) || role === "ADMIN") {
             await commentModel.update(req.body, { where: { id: comment_id } })
             let updatedComment = await commentModel.findOne({ where: { id: comment_id }, attributes: { exclude: ['createdAt', 'updatedAt', 'isDeleted', 'deletedBy', 'deletedAt'] } })
             return res.status(200).json({ status: 200, message: "Comment updated successfully", updatedComment })
