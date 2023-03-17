@@ -14,4 +14,5 @@ router.get("/logout", logOut)
 
 router.post("/:id", isAuth(['ADMIN']), validateUserId, assignAdmin)
 
+
 module.exports = router
