@@ -5,21 +5,27 @@ const sequelize = require("../connections/db_connection");
 exports.signup = async (req, res) => {
     try {
         const { fullName, email, password, contact } = req.body;
-
+        let { role } = req.body
+        if (role === undefined) {
+            role = "USER"
+        }
         const hash = await bcrypt.hash(password, 10);
 
         const user = await userModel.findOne({
             where: {
+                role: role,
                 email: email,
             },
         });
 
         if (!user) {
+
             const user = await userModel.create({
                 fullName,
                 email,
                 password: hash,
                 contact,
+                role
             });
             const User = await userModel.findOne({
                 where: {
