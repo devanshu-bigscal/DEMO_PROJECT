@@ -31,7 +31,7 @@ const upload = multer({
 router.post("/", isAuth(['USER', 'ADMIN']), upload.single("image"), validatePost, createPost)
 router.get("/myposts", isAuth(['USER', 'ADMIN']), allUserPosts)
 router.get("/", isAuth(['USER', 'ADMIN']), allUserPostsExpectUser)
-router.get("/postid/:id", isAuth(['USER']), validatePostId, getPostById)
+router.get("/postid/:id", isAuth(['USER', 'ADMIN']), validatePostId, getPostById)
 router.delete("/:id", isAuth(['USER', 'ADMIN']), validatePostId, deletePostById)
 router.put("/:id", isAuth(['USER', 'ADMIN']), upload.single("image"), validatePostId, editPostById)
 

@@ -30,6 +30,7 @@ exports.signup = async (req, res) => {
             const User = await userModel.findOne({
                 where: {
                     email: user.email,
+                    role: user.role
                 },
                 attributes: {
                     exclude: [
@@ -60,12 +61,20 @@ exports.signup = async (req, res) => {
 
 exports.login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        let { email, password, role } = req.body;
+
+        if (role === undefined) {
+            role = "USER"
+        }
 
         const user = await userModel.findOne({
             where: {
                 email: email,
+                role: role
             },
+            attributes: {
+                exclude: ['createdAt', 'updatedAt', 'deletedAt', 'isDeleted', 'deletedBy']
+            }
         });
 
         if (!user) {
@@ -87,7 +96,10 @@ exports.login = async (req, res) => {
 
         res.cookie("auth_token", token, { maxAge: 3600000 });
 
-        res.status(200).json({ status: 200, message: "User logged in successfully" });
+        user['password'] = undefined
+
+        res.status(200).json({ status: 200, message: "User logged in successfully", user });
+
     } catch (error) {
         console.log(error);
         return res.status(400).json({ status: 400, message: "Bad Request" });

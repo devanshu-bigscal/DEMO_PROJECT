@@ -36,17 +36,19 @@ exports.deleteCommentById = async (req, res) => {
 
         if (!post) return res.status(404).json({ status: 404, error: 'Not Found', message: 'No post found with given post id' })
 
-        const comment = await Post.findOne({ include: [{ model: commentModel, as: "allComments", where: { id: { [Op.eq]: comment_id }, isDeleted: false }, include: [{ model: User, as: "userDetails" }] }] })
+
+        const comment = await commentModel.findOne({ where: { id: comment_id, post_id: req.params.postId, isDeleted: false } })
 
         if (!comment) return res.status(404).json({ status: 404, error: "Not found", message: "comment not found to delete" })
 
-        if (comment.user_id == id || role === "ADMIN" || comment.allComments[0].user_id == comment.allComments[0].userDetails.id) {
-            comment.allComments[0].isDeleted = true
-            comment.allComments[0].deletedBy = role
-            comment.allComments[0].deletedAt = new Date()
-            await comment.allComments[0].save()
+        let deletedComment = comment
+        if (comment.user_id == id || role === "ADMIN" || post.user_id == id) {
+            comment.isDeleted = true
+            comment.deletedBy = role
+            comment.deletedAt = new Date()
+            await comment.save()
 
-            return res.status(200).json({ status: 200, message: "Comment deleted successfully" })
+            return res.status(200).json({ status: 200, message: "Comment deleted successfully", deletedComment })
         } else {
 
             return res.status(401).json({ status: 401, error: 'Unauthorized', message: "Unauthorized to delete comment" })
@@ -71,12 +73,12 @@ exports.editCommentById = async (req, res) => {
         if (!post) return res.status(404).json({ status: 404, error: 'Not Found', message: 'No post found with given post id' })
 
 
-        const comment = await Post.findOne({ include: [{ model: commentModel, as: "allComments", where: { id: { [Op.eq]: comment_id }, isDeleted: false }, include: [{ model: User, as: "userDetails" }] }] })
+        const comment = await commentModel.findOne({ where: { id: comment_id, post_id: req.params.postId, isDeleted: false } })
 
         if (!comment) return res.status(404).json({ status: 404, error: "Not found", message: "comment not found to update" })
 
 
-        if (((comment.allComments[0].user_id == comment.allComments[0].userDetails.id) && Number(comment.user_id) !== id) || role === "ADMIN") {
+        if (role === "ADMIN" || comment.user_id == id) {
             await commentModel.update(req.body, { where: { id: comment_id } })
             let updatedComment = await commentModel.findOne({ where: { id: comment_id }, attributes: { exclude: ['createdAt', 'updatedAt', 'isDeleted', 'deletedBy', 'deletedAt'] } })
             return res.status(200).json({ status: 200, message: "Comment updated successfully", updatedComment })
@@ -103,7 +105,7 @@ exports.getCommentById = async (req, res) => {
         if (!post) return res.status(404).json({ status: 404, error: 'Not Found', message: 'No post found with given post id' })
 
 
-        const comment = await Comment.findOne({ attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'isDeleted', 'deletedBy', 'id', 'post_id'], include: [['id', 'commentId']] }, include: [{ model: Post, as: "postDetails", attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'isDeleted', 'deletedBy', 'id'], include: [['id', 'postId']] }, where: { id: { [Op.eq]: req.params.postId }, isDeleted: false } }] })
+        const comment = await Comment.findOne({ where: { id: comment_id, post_id: req.params.postId, isDeleted: false }, attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'isDeleted', 'deletedBy', 'id', 'post_id'], include: [['id', 'commentId']] }, include: [{ model: Post, as: "postDetails", attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt', 'isDeleted', 'deletedBy', 'id'], include: [['id', 'postId']] } }] })
 
         if (!comment) return res.status(404).json({ status: 404, error: "Not found", message: "comment not found " })
 

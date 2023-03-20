@@ -33,7 +33,8 @@ exports.deletePostById = async (req, res) => {
 
         const post = await postModel.findOne({
             where: {
-                id: req.params.id
+                id: req.params.id,
+                isDeleted: false
             },
             include: [
                 {
@@ -46,6 +47,7 @@ exports.deletePostById = async (req, res) => {
         if (!post)
             return res.status(404).json({ status: 404, error: "Not found", message: "No post found for given post id" })
 
+        let deletedPost = post
         if (post.user_id == id || role === "ADMIN") {
 
             for (const key in post.allComments) {
@@ -62,7 +64,8 @@ exports.deletePostById = async (req, res) => {
             await post.save();
 
 
-            return res.status(200).json({ status: 200, message: "Post deleted successfully" });
+
+            return res.status(200).json({ status: 200, message: "Post deleted successfully", deletedPost });
         } else {
             return res.status(401).json({ status: 401, error: "Unauthorized to delete post" });
         }
