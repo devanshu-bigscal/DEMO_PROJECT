@@ -81,10 +81,11 @@ exports.login = async (req, res) => {
             return res.status(404).json({ status: 404, error: "User account not found" });
         }
 
-        const value = bcrypt.compare(password, user.password);
+        const value = await bcrypt.compare(password, user.password);
+
 
         if (!value) {
-            return res.status(401).json({ status: 401, error: "Password incorrect" });
+            return res.status(401).json({ status: 401, error: "Password incorrect", message: "try again with correct credentials" });
         }
 
         const payload = {

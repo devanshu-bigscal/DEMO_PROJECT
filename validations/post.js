@@ -18,7 +18,7 @@ exports.validatePost = async (req, res, next) => {
     } catch (error) {
 
         error = error.details.map(e => {
-            return e.message
+            return e.message.replaceAll('"', "")
         })
         res.status(400).json({ message: "Bad Request", error: error })
     }
@@ -37,7 +37,7 @@ exports.validatePostId = async (req, res, next) => {
 
     } catch (error) {
         error = error.details.map(e => {
-            return e.message
+            return e.message.replaceAll('"', "")
         })
         res.status(400).json({ message: "Bad Request", error: error })
     }

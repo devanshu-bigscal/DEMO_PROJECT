@@ -16,7 +16,7 @@ exports.validateComment = async (req, res, next) => {
     } catch (error) {
 
         error = error.details.map(e => {
-            return e.message
+            return e.message.replaceAll('"', "")
         })
         res.status(400).json({ message: "Bad Request", error: error })
     }
@@ -40,7 +40,8 @@ exports.validatePostIdAndQuery = async (req, res, next) => {
 
     } catch (error) {
         error = error.details.map(e => {
-            return e.message
+            return e.message.replaceAll('"', "")
+
         })
         res.status(400).json({ message: "Bad Request", error: error })
     }

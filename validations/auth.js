@@ -20,7 +20,8 @@ exports.validateSignup = async (req, res, next) => {
     } catch (error) {
 
         error = error.details.map(e => {
-            return e.message
+            return e.message.replaceAll('"', "")
+
         })
 
         res.status(400).json({ message: 'Bad Request', error: error })
@@ -32,7 +33,7 @@ exports.validateLogin = async (req, res, next) => {
     try {
         const schema = Joi.object({
             email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required(),
-            password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required().min(6).max(12),
+            password: Joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/).required().min(6).max(12),
             role: Joi.string().valid('USER', 'ADMIN').optional()
         })
 
@@ -45,7 +46,7 @@ exports.validateLogin = async (req, res, next) => {
         next()
     } catch (error) {
         error = error.details.map(e => {
-            return e.message
+            return e.message.replaceAll('"', "")
         })
 
         res.status(400).json({ message: 'Bad Request', error: error })
@@ -69,7 +70,8 @@ exports.validateUpdate = async (req, res, next) => {
         next()
     } catch (error) {
         error = error.details.map(e => {
-            return e.message
+            return e.message.replaceAll('"', "")
+
         })
 
         res.status(400).json({ message: 'Bad Request', error: error })
@@ -90,7 +92,8 @@ exports.validateUserId = async (req, res, next) => {
 
     } catch (error) {
         error = error.details.map(e => {
-            return e.message
+            return e.message.replaceAll('"', "")
+
         })
         res.status(400).json({ message: "Bad Request", error: error })
     }
