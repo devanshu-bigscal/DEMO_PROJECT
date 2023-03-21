@@ -3,6 +3,7 @@ const Comment = require("../models/comment")
 const commentModel = require("../models/comment")
 const Post = require("../models/post")
 const User = require("../models/user")
+
 exports.createComment = async (req, res) => {
 
     try {
@@ -41,12 +42,11 @@ exports.deleteCommentById = async (req, res) => {
 
         if (!comment) return res.status(404).json({ status: 404, error: "Not found", message: "comment not found to delete" })
 
-        let deletedComment = comment
         if (comment.user_id == id || role === "ADMIN" || post.user_id == id) {
-            comment.isDeleted = true
-            comment.deletedBy = role
-            comment.deletedAt = new Date()
-            await comment.save()
+
+            await commentModel.update({ isDeleted: true, deletedAt: new Date(), deletedBy: role }, { where: { post_id: req.params.postId, id: comment_id, isDeleted: false } })
+
+            const deletedComment = await commentModel.findOne({ where: { post_id: req.params.postId, id: comment_id, isDeleted: true }, attributes: { exclude: ['createdAt', 'updatedAt', 'post_id', 'user_id'] } })
 
             return res.status(200).json({ status: 200, message: "Comment deleted successfully", deletedComment })
         } else {

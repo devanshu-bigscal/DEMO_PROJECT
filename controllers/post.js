@@ -47,23 +47,14 @@ exports.deletePostById = async (req, res) => {
         if (!post)
             return res.status(404).json({ status: 404, error: "Not found", message: "No post found for given post id" })
 
-        let deletedPost = post
+
         if (post.user_id == id || role === "ADMIN") {
 
-            for (const key in post.allComments) {
-                if (post.allComments[key]['isDeleted'] === false) {
-                    post.allComments[key]['isDeleted'] = true
-                    await post.allComments[key].save()
-                }
-            }
+            await postModel.update({ isDeleted: true, deletedBy: role, deletedAt: new Date() }, { where: { isDeleted: false, id: req.params.id } })
 
-            post.isDeleted = true
-            post.deletedAt = new Date();
-            post.deletedBy = req.user.role;
+            await Comment.update({ isDeleted: true, deletedBy: role, deletedAt: new Date() }, { where: { post_id: req.params.id, isDeleted: false } })
 
-            await post.save();
-
-
+            const deletedPost = await postModel.findOne({ where: { id: req.params.id }, attributes: { exclude: ['createdAt', 'updatedAt', 'user_id'] }, include: [{ model: Comment, as: "allComments", attributes: { exclude: ['createdAt', 'updatedAt'] } }] })
 
             return res.status(200).json({ status: 200, message: "Post deleted successfully", deletedPost });
         } else {

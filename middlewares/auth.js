@@ -12,7 +12,6 @@ exports.isAuth = function (roles) {
     return function (req, res, next) {
         passport.authenticate("jwt", { session: false }, (err, user, info) => {
             if (err) {
-                console.log(roles, "first")
                 return res.status(401).json({ message: "Unauthorized user" })
             }
             else {
